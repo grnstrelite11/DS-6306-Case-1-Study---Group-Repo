@@ -1,0 +1,33 @@
+---
+title: "Case Study MarkDown"
+author: "Victor Kovatch - Group"
+date: "1/7/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r intro, echo=FALSE}
+######################
+#                    #
+#     Libraries      #
+#                    #
+######################
+
+
+```
+
+
+```{r rawdata, echo=FALSE}
+######################
+#                    #
+#     RawData        #
+#                    #
+######################
+#read in brewery data
+
+
+
+```
