@@ -9,14 +9,15 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r intro, echo=FALSE}
+```{r library, echo=FALSE}
 ######################
 #                    #
 #     Libraries      #
 #                    #
 ######################
-
-
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
 ```
 
 
@@ -27,7 +28,98 @@ knitr::opts_chunk$set(echo = TRUE)
 #                    #
 ######################
 #read in brewery data
+raw_brewery <- read.csv("breweries.csv", header=T)
 
 
+```
 
+```{r CleanData, echo=FALSE}
+######################
+#                    #
+#   Clean Raw Data   #
+#                    #
+######################
+
+working_brewery <- as.data.frame(raw_brewery)
+
+#Trim white space Start and End in String Variables
+working_brewery$Name = str_trim(working_brewery$Name)
+working_brewery$City = str_trim(working_brewery$City)
+working_brewery$State = str_trim(working_brewery$State)
+
+#Trim white space repeated String Variables
+working_brewery$Name =  str_squish(working_brewery$Name)
+working_brewery$City =  str_squish(working_brewery$City)
+working_brewery$State = str_squish(working_brewery$State)
+
+#Test States if there are more then 2 Charters
+len <- nchar(working_brewery$State)
+summary(len)
+
+###### Searching for Duplicate in Brewery Name
+###### In EDA Found Example 1: Against the Grain Brewery and Against The Grain Brewery
+###### Solution: Lower Case
+
+working_brewery$Name = tolower(working_brewery$Name)
+working_brewery$Dupes = duplicated(working_brewery$Name)
+
+dupes <- filter(working_brewery,Dupes == TRUE)
+
+###### In EDA Found Example 2: Angry Minnow vs Angry Minnow Brewing Company
+###### Solution: Remove Word Brewing And Company
+
+working_brewery$Name  =  str_remove(working_brewery$Name,"brewing")
+working_brewery$Name  =  str_remove(working_brewery$Name,"company")
+working_brewery$Name  =  str_trim(working_brewery$Name)
+working_brewery$Name  =  str_squish(working_brewery$Name)
+working_brewery$Dupes =  duplicated(working_brewery$Name)
+dupes <- filter(working_brewery,Dupes == TRUE)
+
+###### In EDA Found Example 3: The Black Tooth Brewing & Black Tooth Brewing
+###### Solution: Remove [The ]
+working_brewery_test <- working_brewery
+working_brewery$Name  = str_remove(working_brewery$Name,"the ")
+working_brewery$Name  = str_trim(working_brewery$Name)
+working_brewery$Name  = str_squish(working_brewery$Name)
+working_brewery$Dupes = duplicated(working_brewery$Name)
+dupes <- filter(working_brewery,Dupes == TRUE)
+
+
+###### In EDA Found Example 4: Goose Island Brewery vs Goose Island Brewing
+###### Solution: Remove Brewery
+working_brewery_test <- working_brewery
+working_brewery$Name  = str_remove(working_brewery$Name,"brewery")
+working_brewery$Name  = str_trim(working_brewery$Name)
+working_brewery$Name  = str_squish(working_brewery$Name)
+working_brewery$Dupes = duplicated(working_brewery$Name)
+dupes <- filter(working_brewery,Dupes == TRUE)
+```
+
+```{r Question 1, echo=FALSE}
+######################
+#                    #
+#     Questions 1    #
+#                    #
+######################
+
+#Table of Breweries # by State
+brewery_state_tbl = working_brewery %>% 
+                    group_by(State) %>% 
+                      summarize(brewery_count = n()) %>%      
+                        arrange(-brewery_count)
+brewery_state.df =as.data.frame(brewery_state_tbl)
+
+#Plot of Breweries # by State Alphabetical order or Decreasing Order
+
+
+#Plot of No. Breweries by State in alphabetical order
+brewery_state.df  %>% ggplot(aes(State,brewery_count,fill=State)) + 
+  geom_col() + 
+  ggtitle("Breweries by State - Alphabetical") + 
+  ylab("# Breweries") + 
+  theme(axis.text.x=element_blank()) 
+
+#Plot of No. Breweries by State in decreasing order
+State_Breweries_df$State1=factor(State_Breweries_df$State,levels=State_Breweries_df$State[order(-State_Breweries_df$No.Breweries)]) 
+State_Breweries_df %>% ggplot(aes(State1,No.Breweries,fill=State1)) + geom_col() + ggtitle("Number of Breweries by State - Decreasing") + ylab("# Breweries") + xlab("State") + theme(axis.text.x=element_blank())
 ```
